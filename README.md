@@ -13,5 +13,5 @@ A NES remake of the TI-99/4a game.
 
 ### Running
 
-* Run the `peal.nes` using a NES emulator. It has been tested with [FCEUX](http://www.fceux.com/)
+* Run the `peal.nes` using a NES emulator (usually in the file open menu). It has been tested with [FCEUX](http://www.fceux.com/) and [Nestopia](http://nestopia.sourceforge.net/).
 
