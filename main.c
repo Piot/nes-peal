@@ -51,7 +51,7 @@ int main()
 
 	setup_colors();
 
-	write_string("Andre is cool!");
+	write_string("André is cool!");
 
 	zero_screen_position();	
 	
