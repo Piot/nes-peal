@@ -2,8 +2,8 @@
 
 typedef unsigned char u8;
 
-u8 player1_x = 1;
-u8 player1_y = 2;
+u8 player1_x = 0;
+u8 player1_y = 0;
 
 u8 joypad1_data = 0;
 u8 joypad2_data = 0;
@@ -55,7 +55,7 @@ void read_joypads()
 
 void enable_screen()
 {
-	ppu_control_register_2(0x08);
+	ppu_control_register_2(0x1e);
 }
 
 void disable_screen()
@@ -77,7 +77,7 @@ void game_loop()
 			player1_x++;
 		}
 	} else if (joypad1_data & 0x02) {
-		if (player1_x > 1) {
+		if (player1_x > 0) {
 			player1_x--;
 		}
 	} else if (joypad1_data & 0x04) {
@@ -114,13 +114,12 @@ int main()
 	set_name_position_to_vram(2, 3);
 	write_string("Andre is cool!");
 
-	enable_screen();
 	while (1) {
 		waitvblank();
 		disable_screen();
 		game_loop();
-		enable_screen();
 		zero_screen_position();
+		enable_screen();
 	}
 
 	return 0;
