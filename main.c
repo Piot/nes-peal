@@ -2,25 +2,27 @@
 
 typedef unsigned char u8;
 
-#define ppu_register(a, b) *((u8*)0x2005) = a; *((u8*)0x2005) = b;
+#define ppu_background_scrolling_offset(a, b) *((u8*) 0x2005) = a; *((u8*) 0x2005) = b;
 
-#define ppu_select(a, b) *((u8*)0x2006) = a; *((u8*)0x2006) = b;
+#define vram_address_register(a, b) *((u8*) 0x2006) = a; *((u8*) 0x2006) = b;
 
-#define ppu_write(a) *((u8*)0x2007) = a;
+#define vram_write(a) *((u8*) 0x2007) = a;
+
+#define ppu_control_register_2(a) *((u8*) 0x2001) = a;
 
 void write_string(const char* s)
 {
-	ppu_select(0x20, 0x41);
+	vram_address_register(0x20, 0x41);
 	while (*s)
 	{
-		ppu_write(*s);
+		vram_write(*s);
 		s++;
 	}
 }
 
 void enable_screen()
 {
-	*((u8*) 0x2001) = 0x08;
+	ppu_control_register_2(0x08);
 }
 
 void wait_forever()
@@ -31,16 +33,16 @@ void wait_forever()
 
 void setup_colors()
 {
-	ppu_select(0x3f, 0x00);
-	ppu_write(0x01);
+	vram_address_register(0x3f, 0x00);
+	vram_write(0x01);
 
-	ppu_select(0x3f, 0x03);
-	ppu_write(0x30);
+	vram_address_register(0x3f, 0x03);
+	vram_write(0x30);
 }
 
 void zero_screen_position()
 {
-	ppu_register(0x00, 0x00);
+	ppu_background_scrolling_offset(0x00, 0x00);
 }
 
 int main()
