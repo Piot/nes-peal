@@ -112,7 +112,7 @@ int main()
 	setup_colors();
 
 	set_name_position_to_vram(2, 3);
-	write_string("Andre is cool!");
+	write_string("André is cool!");
 
 	while (1) {
 		waitvblank();
