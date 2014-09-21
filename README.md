@@ -3,7 +3,7 @@ PEAL
 
 A NES remake of the TI-99/4a game.
 
-# Compiling
+### Compiling
 
 * Download the latest cc65 from http://cc65.github.io/cc65/.
 
@@ -11,7 +11,7 @@ A NES remake of the TI-99/4a game.
 
 * run `compile.bat` to produce the `peal.nes` file.
 
-# Running
+### Running
 
 * Run the `peal.nes` using a NES emulator. It has been tested with [FCEUX](http://www.fceux.com/)
 
