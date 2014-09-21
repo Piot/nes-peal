@@ -2,8 +2,8 @@
 
 typedef unsigned char u8;
 
-u8 player1_x = 0;
-u8 player1_y = 0;
+u8 player1_x = 1;
+u8 player1_y = 1;
 
 u8 joypad1_data = 0;
 u8 joypad2_data = 0;
@@ -73,19 +73,19 @@ void game_loop()
 	}
 	set_char(player1_x, player1_y, ' ');
 	if (joypad1_data & 0x01) {
-		if (player1_x < 31) {
+		if (player1_x < 30) {
 			player1_x++;
 		}
 	} else if (joypad1_data & 0x02) {
-		if (player1_x > 0) {
+		if (player1_x > 1) {
 			player1_x--;
 		}
 	} else if (joypad1_data & 0x04) {
-		if (player1_y < 29) {
+		if (player1_y < 28) {
 			player1_y++;
 		}
 	} else if (joypad1_data & 0x08) {
-		if (player1_y > 0) {
+		if (player1_y > 1) {
 			player1_y--;
 		}
 	}
@@ -112,7 +112,7 @@ int main()
 	setup_colors();
 
 	set_name_position_to_vram(2, 3);
-	write_string("André is cool!");
+	write_string("Andre´ is cool!");
 
 	while (1) {
 		waitvblank();
