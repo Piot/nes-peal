@@ -20,7 +20,7 @@ u8 level[LEVEL_OCTET_SIZE];
 
 int i;
 int j;
-int points = 0;
+u8 points = 0;
 
 #define ppu_background_scrolling_offset(a, b) *((u8*) 0x2005) = a; *((u8*) 0x2005) = b;
 
@@ -140,13 +140,13 @@ void check_avatar_needs_to_stop(u8 player_x, u8 player_y, s8* player_direction_x
 	}
 }
 
-void check_if_pill(u8 player_x, u8 player_y)
+void check_if_pill(u8 player_x, u8 player_y, u8* points)
 {
 	i = ((int)player_y << 5) + player_x;
 	temp = level[i];
 	if (temp == '.') {
 		level[i] = ' ';
-		 ++points;
+		 ++*points;
 	}
 }
 
@@ -167,7 +167,7 @@ void game_loop()
 	check_avatar_needs_to_stop(player1_x, player1_y, &player1_direction_x, &player1_direction_y);
 	clear_char(player1_x, player1_y);
 	move_avatar(&player1_x, &player1_y, player1_direction_x, player1_direction_y);
-	check_if_pill(player1_x, player1_y);
+	check_if_pill(player1_x, player1_y, &points);
 	draw_avatar(player1_x, player1_y);
 }
 
@@ -217,10 +217,14 @@ const char* level1 = "////////////////////////////////"
 	"////////////////////////////////";
 	
 	
-int count_underscores(char* level1) {
-  int count = 0;
-  for (int i = 0; i < strlen(level1); i++)
-    if (level1[i] == '.') count++;
+int count_underscores() {
+	int count = 0;
+
+	for (i = 0; i < LEVEL_OCTET_SIZE; i++) {
+		if (level[i] == '.') count++;
+	}
+
+	return count;
 }
 
 
