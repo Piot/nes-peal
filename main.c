@@ -1,9 +1,13 @@
 #include <nes.h>
 
 typedef unsigned char u8;
+typedef signed char s8;
 
 u8 player1_x = 2;
 u8 player1_y = 2;
+
+s8 player1_direction_x = 0;
+s8 player1_direction_y = 0;
 
 u8 joypad1_data = 0;
 u8 joypad2_data = 0;
@@ -69,58 +73,100 @@ void disable_screen()
 	ppu_control_register_2(0x00);
 }
 
-
-void game_loop()
+void joypad_direction(u8 joypad_data, s8* direction_x, s8* direction_y)
 {
-	u8 next_x = player1_x;
-	u8 next_y = player1_y;
-
-	read_joypads();
-	frame_counter++;
-	if (frame_counter % 4 != 0) {
-		return;
-	}
-	if (joypad1_data & 0x01) {
-		if (player1_x < 30) {
-			next_x = player1_x + 1;
-		} else {
-			return;
-		}
+	if (joypad_data & 0x01) {
+		*direction_y = 0;
+		*direction_x = 1;
 	} else if (joypad1_data & 0x02) {
-		if (player1_x > 1) {
-			next_x = player1_x - 1;
-		} else {
-			return;
-		}
+		*direction_y = 0;
+		*direction_x = -1;
 	} else if (joypad1_data & 0x04) {
-		if (player1_y < 28) {
-			next_y = player1_y + 1;
-		} else {
-			return;
-		}
+		*direction_x = 0;
+		*direction_y = 1;
 	} else if (joypad1_data & 0x08) {
-		if (player1_y > 1) {
-			next_y = player1_y - 1;
-		} else {
-			return;
-		}
-	} else {
-		return;
+		*direction_x = 0;
+		*direction_y = -1;
 	}
+}
 
-	i = ((int)next_y << 5) + next_x;
+int can_avatar_walk_there(u8 x, u8 y)
+{
+	i = ((int)y << 5) + x;
 	temp = level[i];
-	if (temp != '.' && temp != ' ') {
+	return temp == '.' || temp == ' ';
+}
+
+
+void check_new_direction(u8 joypad_data, u8 player_x, u8 player_y, s8 *player_direction_x, s8 *player_direction_y)
+{
+	u8 next_x;
+	u8 next_y;
+	s8 new_player_direction_x = 0;
+	s8 new_player_direction_y = 0;
+
+	joypad_direction(joypad_data, &new_player_direction_x, &new_player_direction_y);
+	if (new_player_direction_y == 0 && new_player_direction_x == 0) {
 		return;
 	}
+	next_x = player_x + new_player_direction_x;
+	next_y = player_y + new_player_direction_y;
+	if (can_avatar_walk_there(next_x, next_y)) {
+		*player_direction_x = new_player_direction_x;
+		*player_direction_y = new_player_direction_y;
+	}
+}
+
+void move_avatar(u8* player_x, u8* player_y, s8 player_direction_x, s8 player_direction_y)
+{
+	*player_x += player_direction_x;
+	*player_y += player_direction_y;
+}
+
+void clear_char(u8 player_x, u8 player_y)
+{
+	i = ((int)player_y << 5) + player_x;
+	set_char(player_x, player_y, level[i]);
+}
+
+void check_avatar_needs_to_stop(u8 player_x, u8 player_y, s8* player_direction_x, s8* player_direction_y)
+{
+	u8 next_x = player_x + *player_direction_x;
+	u8 next_y = player_y + *player_direction_y;
+	if (!can_avatar_walk_there(next_x, next_y)) {
+		*player_direction_x = 0;
+		*player_direction_y = 0;
+	}
+}
+
+void check_if_pill(u8 player_x, u8 player_y)
+{
+	i = ((int)player_y << 5) + player_x;
+	temp = level[i];
 	if (temp == '.') {
 		level[i] = ' ';
 	}
-	i = ((int)player1_y << 5) + player1_x;
-	set_char(player1_x, player1_y, level[i]);
-	player1_x = next_x;
-	player1_y = next_y;
-	set_char(player1_x, player1_y, 'x');
+}
+
+void draw_avatar(u8 player_x, u8 player_y)
+{
+	set_char(player_x, player_y, 'x');
+}
+
+void game_loop()
+{
+	frame_counter++;
+
+	read_joypads();
+	check_new_direction(joypad1_data, player1_x, player1_y, &player1_direction_x, &player1_direction_y);
+	if (frame_counter % 4 != 0) {
+		return;
+	}
+	check_avatar_needs_to_stop(player1_x, player1_y, &player1_direction_x, &player1_direction_y);
+	clear_char(player1_x, player1_y);
+	move_avatar(&player1_x, &player1_y, player1_direction_x, player1_direction_y);
+	check_if_pill(player1_x, player1_y);
+	draw_avatar(player1_x, player1_y);
 }
 
 void setup_colors()
