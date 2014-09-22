@@ -173,7 +173,6 @@ const char* level1 = "////////////////////////////////"
 	
 int count_underscores(char* level1) {
   int count = 0;
-
   for (int i = 0; i < strlen(level1); i++)
     if (level1[i] == '.') count++;
 }
