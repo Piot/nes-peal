@@ -112,7 +112,7 @@ int main()
 	setup_colors();
 
 	set_name_position_to_vram(0, 0);
-	// Maze
+	//   Maze
 	write_string("////////////////////////////////");
 	write_string("/ #############################/");
 	write_string("/............................../");
@@ -143,7 +143,7 @@ int main()
 	write_string("/............................../");
 	write_string("/##############################/");
 	write_string("////////////////////////////////");
-	// /Maze
+	//   /Maze
 
 
 	while (1) {
