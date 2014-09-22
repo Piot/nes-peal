@@ -20,6 +20,7 @@ u8 level[LEVEL_OCTET_SIZE];
 
 int i;
 int j;
+int points = 0;
 
 #define ppu_background_scrolling_offset(a, b) *((u8*) 0x2005) = a; *((u8*) 0x2005) = b;
 
@@ -145,6 +146,7 @@ void check_if_pill(u8 player_x, u8 player_y)
 	temp = level[i];
 	if (temp == '.') {
 		level[i] = ' ';
+		 ++points;
 	}
 }
 
@@ -213,6 +215,13 @@ const char* level1 = "////////////////////////////////"
 	"/............................../"
 	"/##############################/"
 	"////////////////////////////////";
+	
+	
+int count_underscores(char* level1) {
+  int count = 0;
+  for (int i = 0; i < strlen(level1); i++)
+    if (level1[i] == '.') count++;
+}
 
 
 
