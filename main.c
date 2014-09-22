@@ -116,7 +116,7 @@ void game_loop()
 	}
 	if (temp == '.') {
 		level[i] = ' ';
-		++points;
+		 ++points;
 	}
 	i = ((int)player1_y << 5) + player1_x;
 	set_char(player1_x, player1_y, level[i]);
@@ -176,6 +176,8 @@ int count_underscores(char* level1) {
   for (int i = 0; i < strlen(level1); i++)
     if (level1[i] == '.') count++;
 }
+
+
 
 void draw_level()
 {
