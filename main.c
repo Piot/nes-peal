@@ -16,6 +16,7 @@ u8 level[LEVEL_OCTET_SIZE];
 
 int i;
 int j;
+int points = 0;
 
 #define ppu_background_scrolling_offset(a, b) *((u8*) 0x2005) = a; *((u8*) 0x2005) = b;
 
@@ -115,6 +116,7 @@ void game_loop()
 	}
 	if (temp == '.') {
 		level[i] = ' ';
+		++points;
 	}
 	i = ((int)player1_y << 5) + player1_x;
 	set_char(player1_x, player1_y, level[i]);
@@ -167,8 +169,14 @@ const char* level1 = "////////////////////////////////"
 	"/............................../"
 	"/##############################/"
 	"////////////////////////////////";
+	
+	
+int count_underscores(char* level1) {
+  int count = 0;
 
-
+  for (int i = 0; i < strlen(level1); i++)
+    if (level1[i] == '.') count++;
+}
 
 void draw_level()
 {
