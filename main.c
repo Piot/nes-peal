@@ -2,12 +2,18 @@
 
 typedef unsigned char u8;
 typedef signed char s8;
+typedef unsigned int u16;
 
-u8 player1_x = 2;
-u8 player1_y = 2;
+u8 player1_x = 16;
+u8 player1_y = 16;
+
+u8 player1_old_x = 0;
+u8 player1_old_y = 0;
 
 s8 player1_direction_x = 0;
 s8 player1_direction_y = 0;
+
+u16 player1_points = 0;
 
 u8 joypad1_data = 0;
 u8 joypad2_data = 0;
@@ -15,12 +21,13 @@ u8 joypad2_data = 0;
 u8 temp;
 u8 frame_counter = 0;
 
-#define LEVEL_OCTET_SIZE (32*30)
+#define LEVEL_OCTET_SIZE (32*29)
 u8 level[LEVEL_OCTET_SIZE];
 
 int i;
 int j;
-u8 points = 0;
+
+#define ppu_control(a) *((u8 *) 0x2000) = a;
 
 #define ppu_background_scrolling_offset(a, b) *((u8*) 0x2005) = a; *((u8*) 0x2005) = b;
 
@@ -39,17 +46,8 @@ u8 points = 0;
 #define joypad1_read (*((u8*) 0x4016) & 0x01)
 #define joypad2_read (*((u8*) 0x4017) & 0x01)
 
-void write_string(const char* s)
-{
-	while (*s)
-	{
-		vram_write(*s);
-		s++;
-	}
-}
 
-
-#define set_char(x, y, c) set_name_position_to_vram(x, y); vram_write(c);
+#define set_char(x, y, c) ; set_name_position_to_vram(x, y); vram_write(c);
 
 void read_joypads()
 {
@@ -98,7 +96,6 @@ int can_avatar_walk_there(u8 x, u8 y)
 	return temp == '.' || temp == ' ';
 }
 
-
 void check_new_direction(u8 joypad_data, u8 player_x, u8 player_y, s8 *player_direction_x, s8 *player_direction_y)
 {
 	u8 next_x;
@@ -124,7 +121,7 @@ void move_avatar(u8* player_x, u8* player_y, s8 player_direction_x, s8 player_di
 	*player_y += player_direction_y;
 }
 
-void clear_char(u8 player_x, u8 player_y)
+void fastcall clear_char(u8 player_x, u8 player_y)
 {
 	i = ((int)player_y << 5) + player_x;
 	set_char(player_x, player_y, level[i]);
@@ -140,7 +137,7 @@ void check_avatar_needs_to_stop(u8 player_x, u8 player_y, s8* player_direction_x
 	}
 }
 
-void check_if_pill(u8 player_x, u8 player_y, u8* points)
+void check_if_pill(u8 player_x, u8 player_y, u16* points)
 {
 	i = ((int)player_y << 5) + player_x;
 	temp = level[i];
@@ -150,10 +147,19 @@ void check_if_pill(u8 player_x, u8 player_y, u8* points)
 	}
 }
 
-void draw_avatar(u8 player_x, u8 player_y)
+void fastcall draw_avatar(u8 player_x, u8 player_y)
 {
 	set_char(player_x, player_y, 'x');
 }
+
+void fastcall display_score(u16 score, u8 x)
+{
+	set_name_position_to_vram(x, 3);
+	vram_write(48 + (score / 100) % 10);
+	vram_write(48 + (score / 10) % 10);
+	vram_write(48 + score % 10);
+}
+
 
 void game_loop()
 {
@@ -165,10 +171,8 @@ void game_loop()
 		return;
 	}
 	check_avatar_needs_to_stop(player1_x, player1_y, &player1_direction_x, &player1_direction_y);
-	clear_char(player1_x, player1_y);
 	move_avatar(&player1_x, &player1_y, player1_direction_x, player1_direction_y);
-	check_if_pill(player1_x, player1_y, &points);
-	draw_avatar(player1_x, player1_y);
+	check_if_pill(player1_x, player1_y, &player1_points);
 }
 
 void setup_colors()
@@ -214,7 +218,7 @@ const char* level1 = "////////////////////////////////"
 	"/.#.####.#.####..####.#.####.#./"
 	"/............................../"
 	"/##############################/"
-	"////////////////////////////////";
+	;
 	
 	
 int count_underscores() {
@@ -226,7 +230,6 @@ int count_underscores() {
 
 	return count;
 }
-
 
 
 void draw_level()
@@ -244,21 +247,31 @@ void copy_to_active_level()
 	}
 }
 
+void fastcall do_all_rendering(void)
+{
+	clear_char(player1_old_x, player1_old_y);
+	draw_avatar(player1_x, player1_y);
+	display_score(player1_points, 3);
+}
 
 int main()
 {
 	waitvblank();
+	ppu_control(0);
 	setup_colors();
 	copy_to_active_level();
 	draw_level();
-	set_char(player1_x, player1_y, 'x');
 
+	enable_screen();
 	while (1) {
 		waitvblank();
-		disable_screen();
-		game_loop();
 		zero_screen_position();
-		enable_screen();
+		do_all_rendering();
+		zero_screen_position();
+		player1_old_x = player1_x;
+		player1_old_y = player1_y;
+
+		game_loop();
 	}
 
 	return 0;
