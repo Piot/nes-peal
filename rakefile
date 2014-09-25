@@ -1,0 +1,31 @@
+PREFIX = '../cc65/bin/'
+EXECUTABLE = 'peal.nes'
+
+C_FILES = FileList['**/*.c']
+C_FILES.each do |c|
+	asm_s = c.pathmap("%{^c,asm_s}X.s")
+	file asm_s => c do
+		puts "Converting #{c} to #{asm_s}"
+		sh "#{PREFIX}cc65.exe -t nes #{c} -Oi -o #{asm_s}"
+	end
+	task :default => asm_s
+end
+
+ASM_FILES = FileList['**/*.asm', '**/*.s']
+ASM_FILES.each do |asm|
+	obj = asm.pathmap("%{^asm|^s,obj}X.o")
+	file obj => asm do
+		puts "Converting #{asm} to #{obj}"
+		sh "#{PREFIX}ca65.exe -t nes #{asm} -o #{obj}"
+	end
+
+	task :default => obj
+end
+
+OBJ_FILES = FileList['**/*.o']
+file 'peal.nes' => OBJ_FILES do
+	puts "doing something"
+	sh "#{PREFIX}ld65.exe -t nes #{OBJ_FILES} #{PREFIX}../lib/nes.lib -o #{EXECUTABLE}"
+end
+
+task :default => EXECUTABLE
