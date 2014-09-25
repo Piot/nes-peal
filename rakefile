@@ -6,7 +6,7 @@ C_FILES.each do |c|
 	asm_s = c.pathmap("%{^c,asm_s}X.s")
 	file asm_s => c do
 		puts "Converting #{c} to #{asm_s}"
-		sh "#{PREFIX}cc65.exe -t nes #{c} -Oi -o #{asm_s}"
+		sh "#{PREFIX}cc65.exe -t nes #{c} -o #{asm_s}"
 	end
 	task :default => asm_s
 end

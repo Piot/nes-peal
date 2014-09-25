@@ -1,4 +1,5 @@
 #include <nes.h>
+#include "graphics.h"
 
 typedef unsigned char u8;
 typedef signed char s8;
@@ -147,11 +148,6 @@ void check_if_pill(u8 player_x, u8 player_y, u16* points)
 	}
 }
 
-void fastcall draw_avatar(u8 player_x, u8 player_y)
-{
-	set_char(player_x, player_y, 'x');
-}
-
 void fastcall display_score(u16 score, u8 x)
 {
 	set_name_position_to_vram(x, 3);
@@ -182,11 +178,6 @@ void setup_colors()
 
 	vram_address_register(0x3f, 0x03);
 	vram_write(0x30);
-}
-
-void zero_screen_position()
-{
-	ppu_background_scrolling_offset(0x00, 0x00);
 }
 
 const char* level1 = "////////////////////////////////"
@@ -250,9 +241,12 @@ void copy_to_active_level()
 void fastcall do_all_rendering(void)
 {
 	clear_char(player1_old_x, player1_old_y);
-	draw_avatar(player1_x, player1_y);
+	asm("ldx %v", player1_x);
+	asm("ldy %v", player1_y);
+	draw_avatar();
 	display_score(player1_points, 3);
 }
+
 
 int main()
 {
@@ -264,8 +258,8 @@ int main()
 
 	enable_screen();
 	while (1) {
+		wait_for_that_vsync();
 		waitvblank();
-		zero_screen_position();
 		do_all_rendering();
 		zero_screen_position();
 		player1_old_x = player1_x;
